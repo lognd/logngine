@@ -1,3 +1,21 @@
+
+if(NOT DEFINED ENV{SKBUILD})
+    message(STATUS "Configuring for local development (not skbuild)...")
+
+    project(logngine LANGUAGES CXX)  # For CLion code insight
+    cmake_minimum_required(VERSION 3.18)
+
+    cmake_policy(SET CMP0054 NEW)
+    cmake_policy(SET CMP0057 NEW)
+    cmake_policy(SET CMP0148 NEW)
+
+    list(APPEND CMAKE_PREFIX_PATH "C:/Program Files/pybind11/share/cmake/pybind11")
+    set(Python3_EXECUTABLE "C:/Program Files/Python312-arm64/python.exe")
+    set(Python3_LIBRARY "C:/Program Files/Python312-arm64/libs/python312.lib")
+    set(Python3_INCLUDE_DIR "C:/Program Files/Python312-arm64/include")
+    find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+endif()
+
 find_package(pybind11 REQUIRED)
 
 # Include your public headers

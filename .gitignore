@@ -1,4 +1,8 @@
-# Homework folder :)
+# All my un-needed local CMake configuration stuff that would make building harder.
+**/CMakeLists.local.txt
+**/cmake-build-*
+
+# Homework folder/folders :)
 homework/
 homework/*
 homework/**/*
