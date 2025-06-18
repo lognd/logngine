@@ -58,9 +58,11 @@ You can look more at `Makefile` for some ideas.
 ```
 src/logngine/
 ├── thermo/         ← Thermodynamic property models (WIP)
+│   └── _core/          ← Compiled C++ bindings (.so/.pyd)
 ├── materials/      ← Materials mechanics (WIP)
-├── uncertainty/    ← Statistical tools (WIP)
-└── _core/          ← Compiled C++ bindings (.so/.pyd)
+│   └── _core/          ← Compiled C++ bindings (.so/.pyd)
+└── uncertainty/    ← Statistical tools (WIP)
+    └── _core/          ← Compiled C++ bindings (.so/.pyd)
 ```
 
 C++ source files live under `src/cpp/` and are compiled into extension modules accessible via `_core/`.
