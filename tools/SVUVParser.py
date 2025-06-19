@@ -349,7 +349,7 @@ class SVUVParser:
         If the original unit is affine (degC, degF, …) we use the matching
         delta-unit (`delta_degC`), otherwise we just forward to `_to_si`.
         """
-        delta_unit = f"delta_{unit}" if unit in self._ureg else unit
+        delta_unit = f"delta_{unit}" if f"delta_{unit}" in self._ureg else unit
         return (unc * self._ureg(delta_unit)).to_base_units().magnitude
 
     def _header_map(self, row: List[Any]) -> Dict[str, Any]:
