@@ -14,7 +14,7 @@ import csv
 from itertools import zip_longest
 from textwrap import shorten
 
-from exceptions import *
+from .exceptions import *
 
 class SVUVParser:
     # Parsing class-constants
@@ -110,13 +110,13 @@ class SVUVParser:
     # ------------------------------------------------------------------ #
     # USER INTERFACE
     # ------------------------------------------------------------------ #
-    def to_csv(self, path: str, *, include_uncert=True) -> None:
+    def to_csv(self, path: str | Path, *, include_uncert=True) -> None:
         """
         Write the parsed table to ``path`` using the built-in csv module.
 
         Parameters
         ----------
-        path : str
+        path : str | Path
             Output file name.
         include_uncert : bool, default True
             If *False* drop the ``$uncertainty`` columns.
@@ -129,7 +129,7 @@ class SVUVParser:
             heads += [f"{h}$uncertainty" for h in heads]
         rows = zip_longest(*(self._data[h] for h in heads), fillvalue="")
 
-        with open(path, "w", newline="", encoding="utf-8") as fh:
+        with open(str(path), "w", newline="", encoding="utf-8") as fh:
             writer = csv.writer(fh)
             writer.writerow(heads)
             writer.writerows(rows)
@@ -140,16 +140,16 @@ class SVUVParser:
         so `print(parser)` doesn’t flood the console.
         """
 
-        heads = [h for h in self.__headers if h != self.IGNORE_LITERAL]
+        heads = [h for h in self._headers if h != self.IGNORE_LITERAL]
         preview = heads.copy()  # header row
 
         # Build a 2-D list: header + up to MAX_ROWS of data
-        for idx in range(min(len(self.__data[heads[0]]), SVUVParser.MAX_ROWS)):
-            preview.extend(self.__data[h][idx] for h in heads)
+        for idx in range(min(len(self._data[heads[0]]), SVUVParser.MAX_ROWS)):
+            preview.extend(self._data[h][idx] for h in heads)
 
         # column-wise max width (honouring cap)
         col_w = {
-            h: min(SVUVParser.MAX_COL, max(len(str(h)), *(len(str(v)) for v in self.__data[h][:SVUVParser.MAX_ROWS])))
+            h: min(SVUVParser.MAX_COL, max(len(str(h)), *(len(str(v)) for v in self._data[h][:SVUVParser.MAX_ROWS])))
             for h in heads
         }
 
@@ -161,11 +161,11 @@ class SVUVParser:
                  "-+-".join("-" * col_w[h] for h in heads)]
 
         # Data lines
-        for i in range(min(len(self.__data[heads[0]]), SVUVParser.MAX_ROWS)):
-            lines.append(" | ".join(_fmt(h, self.__data[h][i]) for h in heads))
+        for i in range(min(len(self._data[heads[0]]), SVUVParser.MAX_ROWS)):
+            lines.append(" | ".join(_fmt(h, self._data[h][i]) for h in heads))
 
-        if len(self.__data[heads[0]]) > SVUVParser.MAX_ROWS:
-            lines.append(f"... ({len(self.__data[heads[0]]) - SVUVParser.MAX_ROWS} more rows)")
+        if len(self._data[heads[0]]) > SVUVParser.MAX_ROWS:
+            lines.append(f"... ({len(self._data[heads[0]]) - SVUVParser.MAX_ROWS} more rows)")
 
         return "\n".join(lines)
 
@@ -274,43 +274,37 @@ class SVUVParser:
                 raise CommandError(f"Unknown command '{cmd}' in {self._file}")
 
     # core row handler ---------------------------------------------
-    def _push_row(self, mapped: dict[str, str]) -> None:
+    def _push_row(self, mapped: dict[str, str]) -> None:  # noqa: N802
         """Add a parsed data row to self._data, converting to SI base units."""
 
         # citation bookkeeping
         if self._citation == "UNKNOWN":
-            warnings.warn(f"No '!cite' before data row in {self._file}; using 'UNKNOWN'.", MissingCitationWarning)
+            warnings.warn(
+                f"No '!cite' before data row in {self._file}; using 'UNKNOWN'.",
+                MissingCitationWarning,
+            )
         self._data["$citation"].append(self._citation)
 
         # iterate over every numeric cell in the row
         for head, text in mapped.items():
-            raw_val = self._numeric(text)  # -> float (as-typed)
+            raw_val = self._numeric(text)  # float as typed
+            raw_unit = self._units[head]
 
-            try:
-                q = raw_val * self._ureg(self._units[head])  # e.g. 101.3 * kilopascal
-            except UndefinedUnitError as exc:
-                raise UnknownUnitError(
-                    f"Unknown unit '{self._units[head]}' for column '{head}' "
-                    f"in {self._file}"
-                ) from exc
+            si_val, si_unit = self._to_si(raw_val, raw_unit)
+            self._data[head].append(si_val)
 
-            q_si = q.to_base_units()  # -> SI base units
-            self._data[head].append(q_si.magnitude)  # store plain float
+            # remember unit once
+            self._si_unit.setdefault(head, si_unit)
 
-            # remember the base-unit string once
-            if head not in self._si_unit:
-                # str() yields a canonical unit representation: 'kg / (m * s^2)'
-                self._si_unit[head] = str(q_si.units)
-
+            # --- uncertainty -------------------------------------------------
             u_key = f"{head}$uncertainty"
-            u_raw = self._uncertainty.get(head)  # may be None if inference needed later
+            u_raw = self._uncertainty.get(head)  # may be None
 
             if u_raw is None:
-                # keep placeholder; inference will occur later
-                self._data[u_key].append(None)
+                self._data[u_key].append(None)  # inferred later
             else:
-                u_q = (u_raw * self._ureg(self._units[head])).to_base_units()
-                self._data[u_key].append(u_q.magnitude)
+                si_unc = self._to_si_unc(u_raw, raw_unit)
+                self._data[u_key].append(si_unc)
 
     def _finalise_uncertainties(self) -> None:
         """Fill in any None entries with inferred values."""
@@ -336,6 +330,27 @@ class SVUVParser:
         if not self._NUMERIC_RE.match(token):
             raise ParseError(f"Invalid numeric token '{token}' in {self._file}")
         return float(token.replace(',', ''))
+
+    def _to_si(self, value: float, unit: str) -> tuple[float, str]:
+        """
+        Return (magnitude, canonical_unit_string) of `value * unit`
+        converted to SI base units.  Raises UnknownUnitError if `unit`
+        is not known to pint.
+        """
+        try:
+            q_si = (value * self._ureg(unit)).to_base_units()
+        except UndefinedUnitError as exc:
+            raise UnknownUnitError(f"Unknown unit “{unit}” in {self._file}") from exc
+        return q_si.magnitude, str(q_si.units)
+
+    def _to_si_unc(self, unc: float, unit: str) -> float:
+        """
+        Convert an *absolute* uncertainty to SI base units **ignoring offsets**.
+        If the original unit is affine (degC, degF, …) we use the matching
+        delta-unit (`delta_degC`), otherwise we just forward to `_to_si`.
+        """
+        delta_unit = f"delta_{unit}" if unit in self._ureg else unit
+        return (unc * self._ureg(delta_unit)).to_base_units().magnitude
 
     def _header_map(self, row: List[Any]) -> Dict[str, Any]:
         if len(row) != len(self._headers):

@@ -1,29 +1,13 @@
-"""
-pytest for SVUVParser against water/saturation-table.svuv
-------------------------------------------------------------------
-Assumes the repo layout:
-
-project_root/
-├─ tools/SVUVParser.py
-├─ datasets/data/fluids/water/saturation-table.svuv
-└─ tests/test_svuv_parser.py   ← (this file)
-
-Run with:  pytest -v
-"""
-
 from pathlib import Path
-import importlib.util
+import csv
+import sys
 
-# --- locate and import parser from tools/ ------------------------------------
 ROOT = Path(__file__).resolve().parents[1]          # project root
-TOOLS_DIR = ROOT / "tools"
-SPEC = importlib.util.spec_from_file_location(
-    "svuv_parser", TOOLS_DIR / "SVUVParser.py"
-)
-svuv_parser = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(svuv_parser)               # type: ignore[attr-defined]
-SVUVParser = svuv_parser.SVUVParser                # noqa: N806
+sys.path.append(str(ROOT))
 
+from tools import SVUVParser
+
+TOOLS_DIR = ROOT / "tools"
 DATA_FILE = ROOT / "datasets" / "data" / "fluids" / "water" / "saturation-table.svuv"
 
 
@@ -64,9 +48,9 @@ def test_first_and_last_row():
     parser = _parse()
     temps = parser._data["temperature"]
     # first numeric entry (row with 0.01 °C)
-    assert abs(temps[0] - 0.01) < 1e-6
+    assert abs(temps[0] - (0.01+273.15)) < 1e-6
     # last numeric entry (row with 373.95 °C)
-    assert abs(temps[-1] - 373.95) < 1e-6
+    assert abs(temps[-1] - (373.95+372.15)) < 1e-6
 
 
 def test_uncertainty_inferred():
@@ -83,3 +67,36 @@ def test_idempotent():
     assert p1._data == p2._data
     # ensure objects are not literally the same instance
     assert p1._data is not p2._data
+
+def test_human_readable_form(tmp_path):
+    """
+    1. str(parser)   must be a non-empty, multi-line preview
+    2. to_csv()      round-trips exactly to the internal _data dict
+    """
+    parser = _parse()
+
+    # --------- 1. pretty-print preview --------------------------------
+    preview = str(parser)
+    assert len(preview) > 100           # has content
+    assert preview.count("\n") >= parser.MAX_ROWS  # at least MAX_ROWS lines
+
+    # --------- 2. CSV round-trip --------------------------------------
+    csv_file = tmp_path / "out.csv"
+    parser.to_csv(csv_file)             # default: include uncertainties
+    parser.to_csv("out.csv")
+
+    # read it back
+    with csv_file.open(newline="", encoding="utf-8") as fh:
+        reader = csv.reader(fh)
+        headers = next(reader)          # first row written by to_csv
+        rows = list(reader)
+
+    # build the expected 2-D list directly from the parser's data store
+    expected_rows = list(
+        zip(*[parser._data[h] for h in headers])  # noqa: WPS437  (accessing a dunder for test only)
+    )
+    # convert everything to string – str(float) is how csv.writer wrote it
+    expected_rows = [[str(cell) for cell in row] for row in expected_rows]
+
+    assert rows == expected_rows
+
