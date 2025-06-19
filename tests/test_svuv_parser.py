@@ -50,7 +50,7 @@ def test_first_and_last_row():
     # first numeric entry (row with 0.01 °C)
     assert abs(temps[0] - (0.01+273.15)) < 1e-6
     # last numeric entry (row with 373.95 °C)
-    assert abs(temps[-1] - (373.95+372.15)) < 1e-6
+    assert abs(temps[-1] - (373.95+273.15)) < 1e-6
 
 
 def test_uncertainty_inferred():
