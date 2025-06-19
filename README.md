@@ -2,9 +2,8 @@
 
 **logngine** is a fast, extensible engineering computation toolkit designed for personal study, simulation, and experimentation. It aims to distill key tools and insights from across mechanical and aerospace engineering into a reusable, modular codebase — built with performance in mind and designed to scale from classroom problems to real-time simulation.
 
-**Status:** In early development. Currently includes a C++/Python build scaffold with placeholder modules for `thermo`, `uncertainty`, and `materials`.
-
-If you'd like to make a contribution or something, feel free to. One thing that can for sure be improved upon is more saved units in `src/validation/units/...`.
+> **Status:** In early development.  
+> **Latest:** Set up for units integration and table parsing → embedded C++ source generation planned.
 
 ---
 
@@ -12,83 +11,100 @@ If you'd like to make a contribution or something, feel free to. One thing that 
 
 This project is part of a long-term goal to consolidate everything I've studied in engineering — from thermodynamics and materials to numerical methods and uncertainty quantification — into a clean, high-performance library.
 
-The vision (although with some lofty goals) is to support:
+### Vision
 
-- Personal and academic learning
+- Engineering simulation & property modeling
+- Personal and academic learning tools
 - Scientific computing experiments
-- Eventual integration with games/mods (e.g., Minecraft)
+- Integration with games/mods (e.g., Minecraft)
 - Prototyping physical models and solvers
 
 ---
 
-## Features (planned)
+## Features (Planned)
 
-| Module        | Description                                   | Status     |
-|---------------|-----------------------------------------------|------------|
-| `thermo`      | Property tables, steam cycles, psychrometrics | planned    |
-| `uncertainty` | Propagation, Monte Carlo, statistical bounds  | planned    |
-| `materials`   | Stress/strain models, fatigue, fracture       | planned    |
+| Module        | Description                                   | Status   |
+|---------------|-----------------------------------------------|----------|
+| `thermo`      | Property tables, steam cycles, psychrometrics | WIP      |
+| `uncertainty` | Propagation, Monte Carlo, statistical bounds  | WIP      |
+| `materials`   | Stress/strain models, fatigue, fracture       | WIP      |
+| `units`       | Unit validation, conversion, dimensionality   | Drafted  |
 
 ---
 
-## Build System
+## ️ Build System
 
-This project uses a hybrid C++/Python architecture:
+This project uses a hybrid C++/Python architecture with cross-platform tooling:
 
 - Python 3.9+
-- [scikit-build-core](https://github.com/scikit-build/scikit-build-core) (PEP 517 backend)
+- `scikit-build-core` (PEP 517 backend)
+- `pybind11` 2.13+
 - CMake 3.27+
-- pybind11 2.13+
-- Cross-platform: supports MSVC, GCC, Clang
+- Supports MSVC, GCC, Clang
 
-To install in development mode:
+### Install in development mode:
 
 ```bash
 pip install -e .[test]
-```
-
-Then run tests:
-
-```bash
 pytest -v
 ```
 
-You can look more at `Makefile` for some ideas.
+For convenience, you can also use `Makefile` or `make.bat` on Linux and Windows respectively.
+
+---
 
 ## Folder Structure
 
-```
+```text
 src/logngine/
-├── thermo/         ← Thermodynamic property models (WIP)
-│   └── _core/          ← Compiled C++ bindings (.so/.pyd)
-├── materials/      ← Materials mechanics (WIP)
-│   └── _core/          ← Compiled C++ bindings (.so/.pyd)
-└── uncertainty/    ← Statistical tools (WIP)
-    └── _core/          ← Compiled C++ bindings (.so/.pyd)
+├── thermo/         # Thermodynamic property models
+│   └── _core/      # C++ bindings (.so/.pyd)
+├── materials/      # Materials mechanics
+│   └── _core/
+├── uncertainty/    # Statistical tools
+│   └── _core/
+├── units/          # Unit integration and dispatch (WIP)
+│   └── _core/
+├── data/           # Human-editable .svuv tables (planned input)
+└── validation/     # .units files, schema definitions
 ```
 
-C++ source files live under `src/cpp/` and are compiled into extension modules accessible via `_core/`.
+C++ sources live in `src/cpp/` and are compiled into Python modules with `pybind11`.
 
 ---
 
 ## Current Status
 
-Right now the repository builds and runs minimal "hello-world" modules for:
+- Cross-language build system using `pybind11` + `scikit-build-core`
+- Basic submodules build and expose:
 
-- `logngine.thermo.hello()`
-- `logngine.uncertainty.hello()`
-- `logngine.materials.hello()`
+```python
+logngine.thermo.hello()
+logngine.uncertainty.hello()
+logngine.materials.hello()
+logngine.units.hello()
+```
 
-These serve as a proof of concept for the cross-language build system using `pybind11` and `scikit-build-core`.
+- Unit registry and table parser spec complete (`.svuv`, `.units`)
+- Plan to convert raw table data into embedded C++ arrays at build time
 
 ---
 
-## Future Plans
+## Specifications
 
-- Import thermodynamic property tables (e.g., ASHRAE, EES-style)
-- Implement robust interpolation over saturated/superheated states
-- Add symbolic fallbacks and EOS approximations for generality
-- Integrate unit-handling (SI/imperial) across all modules
+- See [`specifications/`](./specifications) for `.svuv` and `.units` documentation
+- Tables live under `src/logngine/data/fluids/`
+- All data is validated against schemas before being compiled into C++
+
+---
+
+## Roadmap
+
+- [ ] Add Python preprocessor to compile `.svuv` and `.units` into C++ code
+- [ ] Symbolic units fallback (e.g., imperial vs SI)
+- [ ] EOS support and interpolated table resolution
+- [ ] Hook into Minecraft/Mod loader as backend
+- [ ] Better test coverage and perf benchmarking
 
 ---
 
@@ -96,16 +112,23 @@ These serve as a proof of concept for the cross-language build system using `pyb
 
 - Myself (*lognd*) — as a personal notebook, simulation engine, and modding sandbox
 - Engineering students and hobbyists
-- Anyone who wants learnable, testable, and efficient engineering models
+- Anyone who wants learnable, testable, efficient models for physics/eng
 
 ---
 
 ## License
 
-[MIT License](LICENSE)
+[MIT License](./LICENSE)
 
 ---
 
 ## Contributions
 
-Not actively accepting pull requests yet — but if this inspires you or you'd like to collaborate, feel free to open an issue or start a discussion.
+Not actively accepting PRs yet, but if this project inspires you, feel free to:
+- Open an issue
+- Suggest `.units` or `.svuv` extensions
+- Help expand the dataset in `src/validation/units/`
+
+Especially helpful: submitting real-world engineering property tables for processing!
+
+---
