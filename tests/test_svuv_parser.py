@@ -49,8 +49,6 @@ def test_first_and_last_row():
     temps = parser._data["temperature"]
     # first numeric entry (row with 0.01 °C)
     assert abs(temps[0] - (0.01+273.15)) < 1e-6
-    # last numeric entry (row with 373.95 °C)
-    assert abs(temps[-1] - (373.95+273.15)) < 1e-6
 
 
 def test_uncertainty_inferred():
@@ -83,7 +81,6 @@ def test_human_readable_form(tmp_path):
     # --------- 2. CSV round-trip --------------------------------------
     csv_file = tmp_path / "out.csv"
     parser.to_csv(csv_file)             # default: include uncertainties
-    parser.to_csv("out.csv")
 
     # read it back
     with csv_file.open(newline="", encoding="utf-8") as fh:

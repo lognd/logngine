@@ -11,7 +11,7 @@ import re
 import shlex
 
 import csv
-from itertools import zip_longest
+from itertools import zip_longest, count
 from textwrap import shorten
 
 from .exceptions import *
@@ -180,6 +180,10 @@ class SVUVParser:
         self._si_unit: dict[str, str] = {}
         self._uncertainty: Dict[str, Optional[float]] = {}
 
+        self._seg_counter = count(0)  # monotonically-increasing segment id
+        self._current_seg = next(self._seg_counter)
+        self._seg_id: list[int] = []  # parallel to each data row
+
         self._data: Dict[str, List[Any]] = {"$citation": []}
         self._citation = "UNKNOWN"
 
@@ -241,9 +245,11 @@ class SVUVParser:
         match cmd:
             case "!set-heading":
                 self._set_headers(self._split(self._next_line()))
+                self._current_seg = next(self._seg_counter)
 
             case "!set-units":
                 self._units.update(self._header_map(self._split(self._next_line())))
+                self._current_seg = next(self._seg_counter)
 
             case "!set-uncertainty":
                 unc_list = self._split(self._next_line())
@@ -252,6 +258,7 @@ class SVUVParser:
                     for t in unc_list
                 ]
                 self._uncertainty = self._header_map(cleaned)
+                self._current_seg = next(self._seg_counter)
 
             case "!ignore-separator":
                 if len(args) != 1:
@@ -275,9 +282,14 @@ class SVUVParser:
 
     # core row handler ---------------------------------------------
     def _push_row(self, mapped: dict[str, str]) -> None:  # noqa: N802
-        """Add a parsed data row to self._data, converting to SI base units."""
+        """Add one parsed data row, converting every value to SI base units."""
 
-        # citation bookkeeping
+        # ─── segmentation bookkeeping (NEW) ────────────────────────────
+        # Must be *before* we start processing values so the row-index
+        # correspondence is 100 % aligned for every column.
+        self._seg_id.append(self._current_seg)
+
+        # ─── citation ---------------------------------------------------
         if self._citation == "UNKNOWN":
             warnings.warn(
                 f"No '!cite' before data row in {self._file}; using 'UNKNOWN'.",
@@ -285,41 +297,60 @@ class SVUVParser:
             )
         self._data["$citation"].append(self._citation)
 
-        # iterate over every numeric cell in the row
+        # ─── per-column processing -------------------------------------
         for head, text in mapped.items():
-            raw_val = self._numeric(text)  # float as typed
-            raw_unit = self._units[head]
+            raw_val  = self._numeric(text)          # -> float (typed units)
+            raw_unit = self._units[head]            # original unit string
 
             si_val, si_unit = self._to_si(raw_val, raw_unit)
-            self._data[head].append(si_val)
+            self._data[head].append(si_val)         # store pure float *in SI*
 
-            # remember unit once
-            self._si_unit.setdefault(head, si_unit)
+            # remember SI-unit symbol the very first time we meet this header
+            if head not in self._si_unit:
+                self._si_unit[head] = si_unit
 
-            # --- uncertainty -------------------------------------------------
-            u_key = f"{head}$uncertainty"
-            u_raw = self._uncertainty.get(head)  # may be None
+            # --- uncertainty -------------------------------------------
+            u_key  = f"{head}$uncertainty"
+            u_raw  = self._uncertainty.get(head)      # may be None
 
             if u_raw is None:
-                self._data[u_key].append(None)  # inferred later
+                self._data[u_key].append(None)        # infer later
             else:
                 si_unc = self._to_si_unc(u_raw, raw_unit)
                 self._data[u_key].append(si_unc)
 
     def _finalise_uncertainties(self) -> None:
-        """Fill in any None entries with inferred values."""
+        """Fill None entries inside each segment using the min-gap rule."""
         for head in self._headers:
             if head == self.IGNORE_LITERAL:
                 continue
+
             u_key = f"{head}$uncertainty"
             col = self._data[head]
             ucol = self._data[u_key]
 
-            for idx, val in enumerate(ucol):
-                if val is None:
-                    prev_v = col[idx - 1] if idx else None
-                    next_v = col[idx + 1] if idx + 1 < len(col) else None
-                    ucol[idx] = self.infer_uncertainty(col[idx], prev_v, next_v)
+            # Walk through consecutive rows **within the same segment**
+            start = 0
+            while start < len(col):
+                seg = self._seg_id[start]
+                end = start
+                while end < len(col) and self._seg_id[end] == seg:
+                    end += 1  # now [start, end) is one contiguous segment
+
+                # Pass 1: infer
+                for i in range(start, end):
+                    if ucol[i] is None:
+                        prev_v = col[i - 1] if i > start else None
+                        next_v = col[i + 1] if i + 1 < end else None
+
+                        # ── conservative min-gap rule ───────────────
+                        gaps = [abs(col[i] - g) for g in (prev_v, next_v) if g is not None]
+                        neigh_unc = 0.5 * min(gaps) if gaps else 0.0
+
+                        lsd_unc = self.infer_uncertainty(col[i])  # LSD only
+                        ucol[i] = max(neigh_unc, lsd_unc)
+
+                start = end
 
     # ------------------------------------------------------------------ #
     # LOW-LEVEL UTILITIES
