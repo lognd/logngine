@@ -79,10 +79,10 @@ C++ sources live in `src/cpp/` and are compiled into Python modules with `pybind
 - Basic submodules build and expose:
 
 ```python
-logngine.thermo.hello()
-logngine.uncertainty.hello()
-logngine.materials.hello()
-logngine.units.hello()
+logngine.thermo.hello_world()
+logngine.uncertainty.hello_world()
+logngine.materials.hello_world()
+logngine.units.hello_world()
 ```
 
 - Unit registry and table parser spec complete (`.svuv`, `.units`)
