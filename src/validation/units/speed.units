@@ -1,9 +1,0 @@
-# Taken from Google.com's Unit Converter, NIST.gov, WolframAlpha
-
-meter_per_second m/s m*s^-1              # SI base unit for speed
-
-mile_per_hour mph 0.44704*x              # 1 mph = 0.44704 m/s (exact, US definition)
-foot_per_second ft/s 0.3048*x            # 1 ft/s = 0.3048 m/s (exact)
-kilometer_per_hour km/h 0.27777777777778*x  # 1 km/h = 1000/3600 = 0.277... m/s
-knot kt 0.514444444*x                    # 1 knot = 0.514444444 m/s (exact = 1852 m / 3600 s)
-mach mach 340.29*x                       # Approximate speed of sound at sea level (20 °C) in m/s

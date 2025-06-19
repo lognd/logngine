@@ -1,5 +1,0 @@
-# Taken from UF's EML3100 Data Table
-kelvin K ~
-celsius °C 1.0*x+273.15
-fahrenheit °F 0.55555555555556*x+255.3722222222222
-rankine R 0.555555555555556*x

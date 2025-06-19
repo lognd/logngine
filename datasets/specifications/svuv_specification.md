@@ -41,11 +41,17 @@ Commands must appear on a line by themselves.
 ### `!set-units`
 - Next non-empty line replaces the unit row
 
-### `!ignore-separator <char>`
+### `!set-uncertainty`
+- Next non-empty line hard-sets the magnitude of the uncertainty, use`~` literal to keep auto-calculating behavior for some rows.
+
+### `!ignore-separator "<char>"`
 - Removes a character from the allowed separator set
 
-### `!add-separator <char>`
+### `!add-separator "<char>"`
 - Adds a character to the allowed separator set
+
+### `!cite "<name>"`
+- Tags all the data until next `!cite` with the source to allow for proper attribution and back-tracing
 
 ---
 

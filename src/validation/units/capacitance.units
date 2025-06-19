@@ -1,8 +1,0 @@
-# Capacitance units
-# Taken from NIST.gov
-
-farad F C*V^-1                       # SI unit of capacitance
-millifarad mF 0.001*x
-microfarad μF 1e-6*x
-nanofarad nF 1e-9*x
-picofarad pF 1e-12*x

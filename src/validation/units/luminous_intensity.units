@@ -1,8 +1,0 @@
-# Luminous intensity
-# Taken from NIST.gov and standard SI
-
-candela cd ~                            # SI base unit
-millicandela mcd 0.001*x
-microcandela μcd 1e-6*x
-nanocandela ncd 1e-9*x
-kilocandela kcd 1000*x

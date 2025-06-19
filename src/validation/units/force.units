@@ -1,8 +1,0 @@
-# Force units
-# Taken from Google.com, NIST.gov, WolframAlpha
-
-newton N kg*m*s^-2                     # SI unit of force
-dyne dyn 1e-5*x                        # CGS unit of force
-kilonewton kN 1000*x                   # 1 kN = 1000 N
-pound_force lbf 4.4482216152605*x     # 1 lbf = 4.4482216152605 N (exact)
-ounce_force ozf 0.27801385095*x       # 1 ozf = 0.27801385095 N

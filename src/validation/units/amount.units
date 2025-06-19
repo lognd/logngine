@@ -1,7 +1,0 @@
-# Amount of substance (mole)
-# Taken from NIST.gov
-
-mole mol ~                              # SI base unit
-millimole mmol 0.001*x
-micromole μmol 1e-6*x
-nanomole nmol 1e-9*x

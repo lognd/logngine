@@ -1,6 +1,0 @@
-# Illuminance
-# Taken from NIST.gov
-
-lux lx lm*m^-2                       # SI unit
-phot ph 1e4*x                        # CGS unit (1 ph = 10,000 lx)
-foot_candle fc 10.76391*x           # 1 fc = 10.76391 lx

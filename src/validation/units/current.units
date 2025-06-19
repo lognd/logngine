@@ -1,8 +1,0 @@
-# Electrical current units
-# Taken from NIST.gov, Google.com, and WolframAlpha
-
-ampere A ~                              # SI base unit of electric current
-milliampere mA 0.001*x                  # 1 mA = 0.001 A
-microampere μA 1e-6*x                   # 1 µA = 1e-6 A
-nanoampere nA 1e-9*x                    # 1 nA = 1e-9 A
-kiloampere kA 1000*x                    # 1 kA = 1000 A

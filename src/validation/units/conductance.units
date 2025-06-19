@@ -1,6 +1,0 @@
-# Electrical conductance
-# Taken from NIST.gov
-
-siemens S A*V^-1                     # SI unit
-millisiemens mS 0.001*x
-microsiemens μS 1e-6*x

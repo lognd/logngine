@@ -1,8 +1,0 @@
-# Resistance units
-# Taken from NIST.gov
-
-ohm Ω V*A^-1                         # SI unit of resistance
-milliohm mΩ 0.001*x
-microohm μΩ 1e-6*x
-kilohm kΩ 1000*x
-megohm MΩ 1e6*x

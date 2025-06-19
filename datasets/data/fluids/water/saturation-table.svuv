@@ -1,6 +1,9 @@
 temperature,pressure,liquid_specific_volume,vapor_specific_volume,liquid_specific_internal_energy,~,vapor_specific_internal_energy,liquid_specific_enthalpy,~,vapor_specific_enthalpy,liquid_specific_entropy,~,vapor_specific_entropy
 T,P,nu_f,nu_g,u_f,~,u_g,h_f,~,h_g,s_f,~,s_g
 celsius,kPa,m^3/kg,m^3/kg,kJ/kg,~,kJ/kg,kJ/kg,~,kJ/kg,kJ/(kg*K),~,kJ/(kg*K)
+!set-uncertainty
+0,~,~,~,~,~,~,~,~,~,~,~,~
+!cite "https://www.slaythepe.com/uploads/7/2/3/9/72392189/appendix1_siunits_1.pdf"
 !ignore-separator ,
 0.01 0.6117 0.001000 206.00 0.000 2374.9 2374.9 0.001 2500.9 2500.9 0.0000 9.1556 9.1556
 5 0.8725 0.001000 147.03 21.019 2360.8 2381.8 21.020 2489.1 2510.1 0.0763 8.9487 9.0249
@@ -81,6 +84,8 @@ celsius,kPa,m^3/kg,m^3/kg,kJ/kg,~,kJ/kg,kJ/kg,~,kJ/kg,kJ/(kg*K),~,kJ/(kg*K)
 !add-separator ,
 !set-heading
 pressure,temperature,liquid_specific_volume,vapor_specific_volume,liquid_specific_internal_energy,~,vapor_specific_internal_energy,liquid_specific_enthalpy,~,vapor_specific_enthalpy,liquid_specific_entropy,~,vapor_specific_entropy
+!set-uncertainty
+0,~,~,~,~,~,~,~,~,~,~,~,~
 !ignore-separator ,
 1.0 6.97 0.001000 129.19 29.302 2355.2 2384.5 29.303 2484.4 2513.7 0.1059 8.8690 8.9749
 1.5 13.02 0.001001 87.964 54.686 2338.1 2392.8 54.688 2470.1 2524.7 0.1956 8.6314 8.8270

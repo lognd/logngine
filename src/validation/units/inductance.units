@@ -1,7 +1,0 @@
-# Inductance
-# Taken from NIST.gov
-
-henry H V*s*A^-1                     # SI unit
-millihenry mH 0.001*x
-microhenry μH 1e-6*x
-nanohenry nH 1e-9*x

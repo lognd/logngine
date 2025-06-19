@@ -10,6 +10,9 @@ readme = "README.md"
 requires-python = ">=3.9"
 authors = [{name = "Logan Dapp", email = "logan@logand.app"}]
 license = {file = "LICENSE"}
+dependencies = [
+    'pint'
+]
 
 [tool.scikit-build]
 cmake.version = ">=3.27"

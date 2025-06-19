@@ -92,7 +92,7 @@ logngine.units.hello_world()
 
 ## Specifications
 
-- See [`specifications/`](./specifications) for `.svuv` and `.units` documentation
+- See [`specifications/`](datasets/specifications) for `.svuv` and `.units` documentation
 - Tables live under `src/logngine/data/fluids/`
 - All data is validated against schemas before being compiled into C++
 
