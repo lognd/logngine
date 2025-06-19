@@ -35,8 +35,14 @@ REM === Clean build artifacts ===
 echo Cleaning build artifacts...
 rmdir /S /Q build 2>nul
 rmdir /S /Q dist 2>nul
+
 for /D %%D in (*.egg-info __pycache__ .pytest_cache) do (
     if exist "%%D" rmdir /S /Q "%%D"
+)
+
+REM Remove .pyd and .so recursively in src\
+for /R src %%F in (*.pyd *.so) do (
+    del /F /Q "%%F"
 )
 goto :eof
 

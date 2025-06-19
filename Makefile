@@ -4,7 +4,7 @@
 #  TROUBLE.
 #
 #  TL;DR IF YOU DON'T KNOW WHAT YOU ARE DOING, DON'T RUN THIS MAKEFILE. USE PIP.
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 .PHONY: all clean uninstall reinstall test reset venv
 
@@ -23,6 +23,9 @@ venv:
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf build dist *.egg-info __pycache__ .pytest_cache
+	@echo "Removing all .so and .pyd files in src/ recursively..."
+	@find src -name '*.so' -delete
+	@find src -name '*.pyd' -delete
 
 uninstall: venv
 	@echo "Uninstalling logngine..."

@@ -1,0 +1,5 @@
+# Magnetic flux density (magnetic induction)
+# Taken from NIST.gov and Google.com
+
+tesla T kg*s^-2*A^-1                 # SI unit
+gauss G 1e-4*x                       # 1 G = 1e-4 T

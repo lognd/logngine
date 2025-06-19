@@ -1,0 +1,20 @@
+# Taken from Google.com's Unit Converter, NIST.gov, and WolframAlpha
+
+meter m ~                             # SI base unit
+
+kilometer km 1000*x                   # 1 km = 1000 m
+centimeter cm 0.01*x                  # 1 cm = 0.01 m
+millimeter mm 0.001*x                 # 1 mm = 0.001 m
+micron μm 1e-6*x                      # 1 µm = 1×10⁻⁶ m (micrometer)
+nanometer nm 1e-9*x                   # 1 nm = 1×10⁻⁹ m
+
+mile mi 1609.344*x                    # 1 mi = 1609.344 m (exact)
+yard yd 0.9144*x                      # 1 yd = 0.9144 m (exact)
+foot ft 0.3048*x                      # 1 ft = 0.3048 m (exact)
+inch in 0.0254*x                      # 1 in = 0.0254 m (exact)
+
+nautical_mile NM 1852*x              # 1 NM = 1852 m (exact)
+fathom ftm 1.8288*x                   # 1 fathom = 1.8288 m
+angstrom Å 1e-10*x                    # 1 Å = 1×10⁻¹⁰ m (used in atomic physics)
+
+planck_length ℓp 1.616255e-35*x       # Planck length (CODATA 2018)

@@ -1,0 +1,5 @@
+# Magnetic flux
+# Taken from NIST.gov and Google.com
+
+weber Wb V*s                          # SI unit of magnetic flux
+maxwell Mx 1e-8*x                     # CGS unit of magnetic flux

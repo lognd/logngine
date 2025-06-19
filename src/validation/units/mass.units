@@ -1,0 +1,20 @@
+# Taken from Google.com's Unit Converter, NIST.gov, and WolframAlpha
+
+kilogram kg ~                         # SI base unit
+
+metric_ton t 1000*x                   # 1 t = 1000 kg
+gram g 0.001*x                        # 1 g = 0.001 kg
+milligram mg 1e-6*x                   # 1 mg = 1×10⁻⁶ kg
+microgram μg 1e-9*x                   # 1 μg = 1×10⁻⁹ kg
+
+imperial_ton lt 1016.0469088*x        # Long ton (UK) = 2240 lb = 1016.0469088 kg
+ton tn 907.18474*x                    # Short ton (US) = 2000 lb = 907.18474 kg
+
+stone st 6.35029318*x                 # 1 st = 14 lb = 6.35029318 kg
+pound lb 0.45359237*x                 # 1 lb = 0.45359237 kg (exact, defined)
+ounce oz 0.028349523125*x             # 1 oz = 0.028349523125 kg (exact)
+
+carat ct 0.0002*x                     # 1 ct = 0.2 g = 0.0002 kg
+atomic_mass_unit u 1.66053906660e-27*x # Unified atomic mass unit (2018 CODATA)
+
+slug slug 14.59390294*x              # 1 slug = 14.59390294 kg (used in imperial mechanics)

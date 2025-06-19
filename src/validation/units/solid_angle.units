@@ -1,0 +1,7 @@
+# Solid angle units
+# Taken from NIST.gov, Google.com, and WolframAlpha
+
+steradian sr ~                        # SI unit of solid angle (dimensionless)
+
+square_degree deg² 0.00030461741978671*x  # 1 deg² ≈ (π/180)^2 sr
+spat spat 12.566370614359172*x       # 1 spat = 4π sr (entire sphere)

@@ -14,8 +14,15 @@ license = {file = "LICENSE"}
 [tool.scikit-build]
 cmake.version = ">=3.27"
 minimum-version = "0.8"
-wheel.packages = ["src/logngine"]   # “src” layout
-sdist.include = ["src", "CMakeLists.txt", "README.md", "LICENSE"]
+wheel.packages = ["src/logngine"]
+sdist.include = [
+    "src",
+    "CMakeLists.txt",
+    "README.md",
+    "LICENSE",
+    "src/data",
+    "src/validation"
+]
 
 [project.optional-dependencies]
 test = [

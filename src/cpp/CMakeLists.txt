@@ -93,3 +93,27 @@ set_target_properties(_materials_core PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/src/logngine/materials/_core
         ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/build/libs
 )
+
+# ===== Units =====
+add_library(logngine_units STATIC
+        units/hello.cpp
+)
+target_include_directories(logngine_units PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+pybind11_add_module(_units_core bindings/py_units.cpp)
+target_link_libraries(_units_core PRIVATE logngine_units)
+target_include_directories(_units_core PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+set_target_properties(_units_core PROPERTIES
+        OUTPUT_NAME "_units_core"
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src/logngine/units/_core
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src/logngine/units/_core
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/libs
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/src/logngine/units/_core
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/src/logngine/units/_core
+        ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/build/libs
+)

@@ -1,0 +1,4 @@
+# Redundant with pressure.units but alias for stress
+# Taken from standard definitions
+
+pascal Pa kg*m^-1*s^-2              # SI unit of pressure/stress

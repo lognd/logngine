@@ -1,0 +1,16 @@
+# Taken from Google.com's Unit Converter, NIST.gov, WolframAlpha, and CRC Handbook
+
+pascal Pa kg*m^-1*s^-2                 # SI base unit of pressure
+
+bar bar 100000*x                       # 1 bar = 100,000 Pa
+pounds_per_square_inch psi 6894.757293168361*x   # 1 psi = 6894.757293 Pa
+atmosphere atm 101325*x               # 1 atm (standard) = 101325 Pa
+
+torr Torr 133.3223684211*x            # 1 Torr = 1/760 atm = 133.3223684211 Pa
+millitorr mTorr 0.1333223684211*x     # 1 mTorr = 1/1000 Torr
+
+millimeter_of_mercury mmHg 133.322387415*x  # 1 mmHg = 133.322387415 Pa (exact, NIST)
+inch_of_mercury inHg 3386.38815789*x       # 1 inHg = 3386.38815789 Pa
+
+kilopascal kPa 1000*x                  # 1 kPa = 1000 Pa (SI prefix)
+megapascal MPa 1e6*x                   # 1 MPa = 1,000,000 Pa

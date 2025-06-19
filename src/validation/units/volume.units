@@ -1,0 +1,15 @@
+# Volume units
+# Taken from Google.com, NIST.gov, WolframAlpha
+
+cubic_meter m^3 ~                       # SI derived unit of volume
+
+liter L 0.001*x                         # 1 L = 0.001 m³
+milliliter mL 1e-6*x                    # 1 mL = 1e-6 m³
+microliter μL 1e-9*x                    # 1 µL = 1e-9 m³
+gallon gal 0.003785411784*x             # US gallon = 3.785411784 L
+quart qt 0.000946352946*x               # US quart = 0.946352946 L
+pint pt 0.000473176473*x                # US pint = 0.473176473 L
+cup cup 0.0002365882365*x               # US cup
+fluid_ounce fl_oz 2.957352956e-5*x      # US fluid ounce
+tablespoon tbsp 1.478676478e-5*x        # US tablespoon
+teaspoon tsp 4.928921594e-6*x           # US teaspoon

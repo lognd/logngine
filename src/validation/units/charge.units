@@ -1,0 +1,10 @@
+# Electric charge units
+# Taken from Google.com, NIST.gov, WolframAlpha
+
+coulomb C A*s                           # SI base unit of electric charge
+
+millicoulomb mC 0.001*x                 # 1 mC = 0.001 C
+microcoulomb μC 1e-6*x                  # 1 µC = 1e-6 C
+nanocoulomb nC 1e-9*x                   # 1 nC = 1e-9 C
+elementary_charge e 1.602176634e-19*x  # 1 e = 1.602×10⁻¹⁹ C (CODATA exact)
+ampere_hour Ah 3600*x                  # 1 Ah = 3600 C

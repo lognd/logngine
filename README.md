@@ -4,6 +4,8 @@
 
 **Status:** In early development. Currently includes a C++/Python build scaffold with placeholder modules for `thermo`, `uncertainty`, and `materials`.
 
+If you'd like to make a contribution or something, feel free to. One thing that can for sure be improved upon is more saved units in `src/validation/units/...`.
+
 ---
 
 ## Motivation

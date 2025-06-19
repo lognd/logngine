@@ -1,0 +1,19 @@
+# Taken from Google.com's Unit Converter, NIST.gov, WolframAlpha, and astronomical time definitions
+
+second s ~                               # SI base unit
+
+nanosecond ns 1e-9*x                     # 1 ns = 1×10⁻⁹ s
+microsecond μs 1e-6*x                    # 1 µs = 1×10⁻⁶ s
+millisecond ms 1e-3*x                    # 1 ms = 1×10⁻³ s
+
+minute min 60*x                          # 1 min = 60 s
+hour h 3600*x                            # 1 h = 3600 s
+day d 86400*x                            # 1 day = 24 × 3600 = 86400 s
+week wk 604800*x                         # 1 wk = 7 days = 604800 s
+
+month mo 2628002.88*x                    # 1 mo = 30.44 days ≈ 2628002.88 s
+calendar_year cy 31536000*x             # 365 days = 31536000 s (non-leap year)
+year yr 31556952*x                      # 1 Julian year = 365.2425 days = 31556952 s
+
+decade dec 315569520*x                   # 10 Julian years
+century cent 3155695200*x               # 100 Julian years
