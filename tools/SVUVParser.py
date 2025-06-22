@@ -417,9 +417,10 @@ class SVUVParser:
         data = {}
         row_iter = iter(row)
         for _header in self._headers:
+            value = next(row_iter)
             if _header == self.IGNORE_LITERAL: continue
             elif _header in constants: data[_header] = constants[_header]
-            else: data[_header] = next(row_iter)
+            else: data[_header] = value
 
         return data
 
