@@ -21,6 +21,54 @@ find_package(pybind11 REQUIRED)
 # Include your public headers
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# ===== Core =====
+add_library(logngine_core STATIC
+        core/hello.cpp
+)
+target_include_directories(logngine_core PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+pybind11_add_module(_core_core bindings/py_core.cpp)
+target_link_libraries(_core_core PRIVATE logngine_core)
+target_include_directories(_core_core PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+set_target_properties(_core_core PROPERTIES
+        OUTPUT_NAME "_core_core"
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src/logngine/core/_core
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src/logngine/core/_core
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/libs
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/src/logngine/core/_core
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/src/logngine/core/_core
+        ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/build/libs
+)
+
+# ===== Data =====
+add_library(logngine_data STATIC
+        data/hello.cpp
+)
+target_include_directories(logngine_data PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+pybind11_add_module(_data_core bindings/py_data.cpp)
+target_link_libraries(_data_core PRIVATE logngine_data)
+target_include_directories(_data_core PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+set_target_properties(_data_core PROPERTIES
+        OUTPUT_NAME "_data_core"
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src/logngine/data/_core
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src/logngine/data/_core
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/libs
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/src/logngine/data/_core
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/src/logngine/data/_core
+        ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/build/libs
+)
+
 # ===== Uncertainty =====
 add_library(logngine_uncertainty STATIC
         uncertainty/hello.cpp
