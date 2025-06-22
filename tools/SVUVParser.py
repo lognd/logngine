@@ -95,12 +95,13 @@ class SVUVParser:
 
             # core header rows ------------------------------------------------
             self._set_headers(self._split(self._next_line()))
+            assert not self._constants, f"Cannot use !constants before variables and units are defined in {self._file}."
             self._vars = self._header_map(self._split(self._next_line()))
             self._units = self._header_map(self._split(self._next_line()))
 
             # main parse loop -------------------------------------------------
             for row in self._row_iter():
-                mapped = self._header_map(row)
+                mapped = self._header_map(row, constants=self._constants)
                 self._push_row(mapped)
 
         # post-process inferred uncertainties
@@ -177,6 +178,8 @@ class SVUVParser:
         self._headers: List[str] = []
         self._vars: Dict[str, str] = {}
         self._units: Dict[str, str] = {}
+        self._constants: Dict[str, str] = {}
+        self._constant_uncertainties: Dict[str, Optional[float]] = {}
         self._si_unit: dict[str, str] = {}
         self._uncertainty: Dict[str, Optional[float]] = {}
 
@@ -199,10 +202,17 @@ class SVUVParser:
         if any(not self._valid_header(h) for h in headers):
             raise ParseError(f"Invalid header names in {self._file}")
 
+        # Check if we're make sure the header doesn't already exist in constants
+        if any(h in self._constants for h in headers):
+            raise ParseError(f"Redefined header after setting it as constant in {self._file}; (maybe you forgot to !reset-constants)?")
+
         # Re-definition checks (after !set-heading)
+        headers += self._constants  # add the constant headers.
+
         if self._headers:
             old = {h for h in self._headers if h != self.IGNORE_LITERAL}
             new = {h for h in headers if h != self.IGNORE_LITERAL}
+
             if old != new:
                 missing = sorted(old - new)
                 raise ParseError(f"!set-header is missing a header: {missing} in {self._file}")
@@ -248,6 +258,8 @@ class SVUVParser:
                 self._current_seg = next(self._seg_counter)
 
             case "!set-units":
+                if self._constants:
+                    raise CommandError(f"Tried to use !set-units with a non-empty constant cache; make sure to use !reset-constants.")
                 self._units.update(self._header_map(self._split(self._next_line())))
                 self._current_seg = next(self._seg_counter)
 
@@ -257,8 +269,22 @@ class SVUVParser:
                     None if t == self.IGNORE_LITERAL else float(t)
                     for t in unc_list
                 ]
-                self._uncertainty = self._header_map(cleaned)
+                self._uncertainty = self._header_map(cleaned, constants=self._constant_uncertainties)
                 self._current_seg = next(self._seg_counter)
+
+            case "!constant":
+                if len(args) not in (2, 3):
+                    raise CommandError(f"!constant takes either two or three arguments, but received {len(args)} in {self._file}.")
+                header = args.pop(0)
+                if not self._valid_header(header): raise CommandError(f"Invalid header passed to !constant: \"{header}\".")
+                if header not in self._headers: raise CommandError(f"Header isn't contained in the headers defined at beginning of file: \"{header}\" not in \"{list(self._headers)}\".")
+                value = args.pop(0)
+                uncertainty = args.pop(0) if args else None
+                self._constants[header] = value
+                self._constant_uncertainties[header] = uncertainty
+
+            case "!reset-constants":
+                self._constants = {}
 
             case "!ignore-separator":
                 if len(args) != 1:
@@ -383,12 +409,19 @@ class SVUVParser:
         delta_unit = f"delta_{unit}" if f"delta_{unit}" in self._ureg else unit
         return (unc * self._ureg(delta_unit)).to_base_units().magnitude
 
-    def _header_map(self, row: List[Any]) -> Dict[str, Any]:
-        if len(row) != len(self._headers):
+    def _header_map(self, row: List[Any], constants: Dict[str, Any] = None) -> Dict[str, Any]:
+        if constants is None: constants = {}
+        if len(row) != (len(self._headers) - len(constants)):
             raise ParseError(f"Header/data length mismatch with row content, {row}, in file, {self._file}")
-        return {
-            h: v for h, v in zip(self._headers, row) if h != self.IGNORE_LITERAL
-        }
+
+        data = {}
+        row_iter = iter(row)
+        for _header in self._headers:
+            if _header == self.IGNORE_LITERAL: continue
+            elif _header in constants: data[_header] = constants[_header]
+            else: data[_header] = next(row_iter)
+
+        return data
 
     def _next_line(self) -> Optional[str]:
         """Return next non-blank, non-comment line (raw)."""
