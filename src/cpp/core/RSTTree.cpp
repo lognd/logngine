@@ -13,12 +13,14 @@ namespace logngine::core
     //  R*-Tree Bounding Regions
     // ----------------------------------------------------------
 #pragma region MBR
+
     template <size_t D>
     MinimumBoundingRegion<D>::MinimumBoundingRegion()
     {
         this->max.fill(-inf);
         this->min.fill(inf);
     }
+
     template <size_t D>
     double MinimumBoundingRegion<D>::area() const
     {
@@ -26,6 +28,7 @@ namespace logngine::core
         for (size_t i = 0; i < D; ++i) result *= (this->max[i] - this->min[i]);
         return result;
     }
+
     template <size_t D>
     bool MinimumBoundingRegion<D>::contains(const std::array<double, D>& point) const
     {
@@ -33,13 +36,16 @@ namespace logngine::core
             if (point[i] < this->min[i] || point[i] > this->max[i]) return false;
         return true;
     }
+
     template <size_t D>
     bool MinimumBoundingRegion<D>::overlaps(const MinimumBoundingRegion& other) const
     {
         // Separating axis theorem
-        for (size_t i = 0; i < D; ++i) if (this->max[i] < other.min[i] || this->min[i] > other.max[i]) return false;
+        for (size_t i = 0; i < D; ++i)
+            if (this->max[i] < other.min[i] || this->min[i] > other.max[i]) return false;
         return true;
     }
+
     template <size_t D>
     void MinimumBoundingRegion<D>::expand(const MinimumBoundingRegion& region)
     {
@@ -49,6 +55,7 @@ namespace logngine::core
             if (region.max[i] > this->max[i]) this->max[i] = region.max[i];
         }
     }
+
     template <size_t D>
     void MinimumBoundingRegion<D>::expand(const std::array<double, D>& point)
     {
@@ -58,10 +65,13 @@ namespace logngine::core
             if (point[i] > this->max[i]) this->max[i] = point[i];
         }
     }
+
 #pragma endregion
 
 #pragma region MBR Helper Functions
-    void SplitTracker::update(const size_t axis, const size_t location, const double overlap, const double margin, const double area)
+
+    void SplitTracker::update(const size_t axis, const size_t location, const double overlap, const double margin,
+                              const double area)
     {
         this->axis = axis;
         this->location = location;
@@ -82,6 +92,7 @@ namespace logngine::core
         }
         return volume;
     }
+
     template <size_t D>
     double compute_margin(MBR<D> A, MBR<D> B)
     {
@@ -89,86 +100,97 @@ namespace logngine::core
         for (size_t i = 0; i < D; ++i) sum += (A.max[i] - A.min[i]) + (B.max[i] - B.min[i]);
         return 2.0 * sum;
     }
+
     template <size_t D>
     double compute_area(MBR<D> A, MBR<D> B)
     {
         return A.area() + B.area();
     }
+
 #pragma endregion
 
-    // ----------------------------------------------------------
-    //  R*-Tree Node
-    // ----------------------------------------------------------
 #pragma region Node
+
     namespace RSTNodeFN
     {
         template <size_t D, size_t N, size_t L, typename S>
-        bool is_leaf(const RSTNode<D, N, L, S>& node){ return std::holds_alternative<RSTLeafNode<D, N, L, S>>(node); }
+        bool is_leaf(const RSTNode<D, N, L, S>& node)
+        {
+            return std::holds_alternative<RSTLeafNode<D, N, L, S>>(node);
+        }
+
         template <size_t D, size_t N, size_t L, typename S>
         size_t get_size(const RSTNode<D, N, L, S>& node)
         {
-            if (auto* internal = std::get_if<RSTInternalNode<D, N, L, S>>(&node)) { return internal->size; }
-            if (auto* leaf = std::get_if<RSTLeafNode<D, N, L, S>>(&node)) { return leaf->size; }
+            if (auto* internal = std::get_if<RSTInternalNode<D, N, L, S>>(&node)) return internal->size;
+            if (auto* leaf = std::get_if<RSTLeafNode<D, N, L, S>>(&node)) return leaf->size;
             throw std::runtime_error("Did not receive an RSTNode in get_size...");
         }
+
         template <size_t D, size_t N, size_t L, typename S>
         bool is_full(const RSTNode<D, N, L, S>& node)
         {
-            if (auto* internal = std::get_if<RSTInternalNode<D, N, L, S>>(&node)) { return internal->is_full(); }
-            if (auto* leaf = std::get_if<RSTLeafNode<D, N, L, S>>(&node)) { return leaf->is_full(); }
+            if (auto* internal = std::get_if<RSTInternalNode<D, N, L, S>>(&node)) return internal->is_full();
+            if (auto* leaf = std::get_if<RSTLeafNode<D, N, L, S>>(&node)) return leaf->is_full();
             throw std::runtime_error("Did not receive an RSTNode in get_size...");
         }
+
         template <size_t D, size_t N, size_t L, typename S>
-        std::optional<SplitResult<D, N, L, S>> insert(RSTNode<D, N, L, S>& node, const std::array<double, D>& key, const S& value)
+        std::optional<SplitResult<D, N, L, S>> insert(RSTNode<D, N, L, S>& node,
+                                                      const std::array<double, D>& key, const S& value)
         {
-            if (auto* internal = std::get_if<RSTInternalNode<D, N, L, S>>(&node)) { return internal->insert(key, value); }
-            if (auto* leaf = std::get_if<RSTLeafNode<D, N, L, S>>(&node)) { return leaf->insert(key, value); }
-            throw std::runtime_error("Did not receive an RSTNode in get_size...");
+            if (auto* internal = std::get_if<RSTInternalNode<D, N, L, S>>(&node))
+                return internal->insert(key, value);
+            if (auto* leaf = std::get_if<RSTLeafNode<D, N, L, S>>(&node))
+                return leaf->insert(key, value);
+            throw std::runtime_error("Did not receive an RSTNode in insert...");
         }
     }
 
+#pragma endregion
+
     // ----------------------------------------------------------
-    //  R*-Tree Leaf Nodes
+    //  R*-Tree Leaf Nodes Helper Functions
     // ----------------------------------------------------------
+
+#pragma region Insertion Helper Functions
     template <size_t D, size_t N, size_t L, typename S>
-    std::optional<SplitResult<D, N, L, S>> RSTLeafNode<D, N, L, S>::insert(const std::array<double, D>& key, const S& value)
+    std::array<SplitEntry<D, S>, N + 1> RSTLeafNode<D, N, L, S>::pack_entries(
+        const std::array<std::optional<MBR<D>>, N>& subregions,
+        const std::array<std::optional<S>, N>& children,
+        const std::array<double, D>& key,
+        const S& value)
     {
-        if (!is_full())
-        {
-            this->subregions[size] = key;
-            this->children[size] = value;
-            this->region.expand(key);
-
-            ++this->size;
-            return std::nullopt;
-        }
-
-        SplitTracker best_split{};
-
-        std::array<SplitEntry<D, S>, N+1> entries{};
+        std::array<SplitEntry<D, S>, N + 1> entries{};
         for (size_t i = 0; i < N; ++i)
         {
-            if (!subregions[i].has_value() || !children[i].has_value()) throw std::runtime_error("Corrupt node: missing subregion/child...");
-            entries[i] = SplitEntry{*subregions[i], *children[i]};
+            if (!subregions[i] || !children[i])
+                throw std::runtime_error("Corrupt node: missing subregion/child...");
+            entries[i] = SplitEntry<D, S>{*subregions[i], *children[i]};
         }
         entries[N] = SplitEntry<D, S>{MBR<D>(key), value};
+        return entries;
+    }
 
-        // Iterate through all the axes
+    template <size_t D, size_t N, size_t L, typename S>
+    SplitTracker RSTLeafNode<D, N, L, S>::find_best_split(std::array<SplitEntry<D, S>, N + 1>& entries)
+    {
+        SplitTracker best_split;
         for (size_t axis = 0; axis < D; ++axis)
         {
             std::sort(entries.begin(), entries.end(),
-               [axis](const SplitEntry<D, S>& a, const SplitEntry<D, S>& b) -> bool { return a.region.min[axis] < b.region.min[axis]; }
-               );
+                      [axis](const SplitEntry<D, S>& a, const SplitEntry<D, S>& b)
+                      {
+                          return a.region.min[axis] < b.region.min[axis];
+                      });
 
             for (size_t k = MIN_SPLIT_COUNT; k < L + 1 - MIN_SPLIT_COUNT; ++k)
             {
                 MBR<D> lower{}, upper{};
-
                 for (size_t j = 0; j < k; ++j) lower.expand(entries[j].region);
                 for (size_t j = k; j < L + 1; ++j) upper.expand(entries[j].region);
 
                 const double overlap = compute_overlap(lower, upper);
-
                 if (overlap > best_split.overlap) continue;
 
                 const double margin = compute_margin(lower, upper);
@@ -179,75 +201,231 @@ namespace logngine::core
                     best_split.update(axis, k, overlap, margin, area);
                     continue;
                 }
-
-                if (margin > best_split.margin) continue;
                 if (margin < best_split.margin)
                 {
                     best_split.update(axis, k, overlap, margin, area);
                     continue;
                 }
-
-                if (area > best_split.area) continue;
-                if (area < best_split.area) best_split.update(axis, k, overlap, margin, area);
+                if (area < best_split.area)
+                {
+                    best_split.update(axis, k, overlap, margin, area);
+                }
             }
         }
 
-        if (best_split.overlap == inf) throw std::runtime_error("Somehow received an empty full RSTLeafNode...");
+        if (best_split.overlap == inf)
+            throw std::runtime_error("Could not find a valid split.");
+        return best_split;
+    }
 
-        // Return the best result found
+    template <size_t D, size_t N, size_t L, typename S>
+    void RSTLeafNode<D, N, L, S>::partition_entries(
+        const std::array<SplitEntry<D, S>, L + 1>& sorted_entries,
+        const size_t split_index,
+        MBR<D>& lower,
+        MBR<D>& upper,
+        std::array<std::optional<MBR<D>>, L + 1>& lower_subregions,
+        std::array<std::optional<S>, L + 1>& lower_children,
+        std::array<std::optional<MBR<D>>, L + 1>& upper_subregions,
+        std::array<std::optional<S>, L + 1>& upper_children)
+    {
+        for (size_t j = 0; j < split_index; ++j)
+        {
+            lower.expand(sorted_entries[j].region);
+            lower_subregions[j] = sorted_entries[j].region;
+            lower_children[j] = sorted_entries[j].value;
+        }
+        for (size_t j = split_index; j < L + 1; ++j)
+        {
+            upper.expand(sorted_entries[j].region);
+            upper_subregions[j - split_index] = sorted_entries[j].region;
+            upper_children[j - split_index] = sorted_entries[j].value;
+        }
+    }
+#pragma endregion
+
+    // ----------------------------------------------------------
+    //  R*-Tree Leaf Nodes Member Functions
+    // ----------------------------------------------------------
+#pragma region Leaf Node Member Functions
+    template <size_t D, size_t N, size_t L, typename S>
+    std::optional<SplitResult<D, N, L, S>> RSTLeafNode<D, N, L, S>::insert(
+        const std::array<double, D>& key, const S& value)
+    {
+        if (!is_full())
+        {
+            subregions[size] = key;
+            children[size] = value;
+            region.expand(key);
+            ++size;
+            return std::nullopt;
+        }
+
+        auto entries = pack_entries(subregions, children, key, value);
+        SplitTracker best_split = find_best_split(entries);
+
         std::sort(entries.begin(), entries.end(),
-               [&best_split](const SplitEntry<D, S>& a, const SplitEntry<D, S>& b) -> bool { return a.region.min[best_split.axis] < b.region.min[best_split.axis]; }
-               );
+                  [&best_split](const SplitEntry<D, S>& a, const SplitEntry<D, S>& b)
+                  {
+                      return a.region.min[best_split.axis] < b.region.min[best_split.axis];
+                  });
 
-        MBR<D> lower{}, upper{};
-        std::array<std::optional<MBR<D>>, L+1> lower_subregions{};
-        std::array<std::optional<S>, L+1> lower_children{};
-        for (size_t j = 0; j < best_split.location; ++j)
-        {
-            lower.expand(entries[j].region);
-            lower_subregions[j] = std::move(entries[j].region);
-            lower_children[j] = std::move(entries[j].value);
-        }
+        MBR<D> lower, upper;
+        std::array<std::optional<MBR<D>>, L + 1> lower_subregions{}, upper_subregions{};
+        std::array<std::optional<S>, L + 1> lower_children{}, upper_children{};
 
-        std::array<std::optional<MBR<D>>, L+1> upper_subregions{};
-        std::array<std::optional<S>, L+1> upper_children{};
-        for (size_t j = best_split.location; j < L + 1; ++j)
-        {
-            upper.expand(entries[j].region);
-            upper_subregions[j] = std::move(entries[j].region);
-            upper_children[j] = std::move(entries[j].value);
-        }
+        partition_entries(entries, best_split.location,
+                          lower, upper,
+                          lower_subregions, lower_children,
+                          upper_subregions, upper_children);
 
-        // Lower split replaces the parent;
         this->region = std::move(lower);
         this->size = best_split.location;
         this->subregions = std::move(lower_subregions);
         this->children = std::move(lower_children);
 
-        std::unique_ptr<RSTLeafNode> sibling = std::make_unique<RSTLeafNode>(
+        auto sibling = std::make_unique<RSTLeafNode<D, N, L, S>>(
             L + 1 - best_split.location,
             upper,
             std::move(upper_subregions),
-            std::move(upper_children)
-            );
+            std::move(upper_children));
 
-        return {upper, std::move(sibling)};
+        return {SplitResult<D, N, L, S>{upper, std::move(sibling)}};
+    }
+#pragma endregion
+
+    // ----------------------------------------------------------
+    //  R*-Tree Internal Nodes Helper Functions
+    // ----------------------------------------------------------
+
+#pragma region Insertion Helper Functions
+template <size_t D, size_t N, size_t L, typename S>
+std::array<SplitEntry<D, std::shared_ptr<RSTNode<D, N, L, S>>>, N + 1>
+RSTInternalNode<D, N, L, S>::pack_entries(
+    const std::array<std::optional<MBR<D>>, N>& subregions,
+    const std::array<std::shared_ptr<RSTNode<D, N, L, S>>, N>& children,
+    const MBR<D>& new_mbr,
+    std::shared_ptr<RSTNode<D, N, L, S>> new_child)
+{
+    std::array<SplitEntry<D, std::shared_ptr<RSTNode<D, N, L, S>>>, N + 1> entries{};
+    for (size_t i = 0; i < N; ++i)
+        entries[i] = { *subregions[i], children[i] };
+    entries[N] = { new_mbr, std::move(new_child) };
+    return entries;
+}
+
+template <size_t D, size_t N, size_t L, typename S>
+void RSTInternalNode<D, N, L, S>::partition_entries(
+    const std::array<SplitEntry<D, std::shared_ptr<RSTNode<D, N, L, S>>>, L + 1>& sorted_entries,
+    const size_t split_index,
+    MBR<D>& lower, MBR<D>& upper,
+    std::array<std::optional<MBR<D>>, L + 1>& lower_subregions,
+    std::array<std::shared_ptr<RSTNode<D, N, L, S>>, L + 1>& lower_children,
+    std::array<std::optional<MBR<D>>, L + 1>& upper_subregions,
+    std::array<std::shared_ptr<RSTNode<D, N, L, S>>, L + 1>& upper_children)
+{
+    for (size_t j = 0; j < split_index; ++j)
+    {
+        lower.expand(sorted_entries[j].region);
+        lower_subregions[j] = sorted_entries[j].region;
+        lower_children[j] = sorted_entries[j].value;
+    }
+    for (size_t j = split_index; j < L + 1; ++j)
+    {
+        upper.expand(sorted_entries[j].region);
+        upper_subregions[j - split_index] = sorted_entries[j].region;
+        upper_children[j - split_index] = sorted_entries[j].value;
+    }
+}
+
+template <size_t D, size_t N, size_t L, typename S>
+size_t RSTInternalNode<D, N, L, S>::find_best_child_insertion(const MBR<D>& key_mbr)
+{
+    size_t best_index = 0;
+    double best_enlargement = inf;
+    double best_area = inf;
+
+    for (size_t i = 0; i < size; ++i)
+    {
+        if (!subregions[i]) continue;
+        MBR<D> current = *subregions[i];
+        double original_area = current.area();
+        current.expand(key_mbr);
+        const double enlargement = current.area() - original_area;
+
+        if (enlargement < best_enlargement ||
+            (enlargement == best_enlargement && original_area < best_area))
+        {
+            best_index = i;
+            best_enlargement = enlargement;
+            best_area = original_area;
+        }
     }
 
+    return best_index;
+}
+#pragma endregion
     // ----------------------------------------------------------
     //  R*-Tree Internal Nodes
     // ----------------------------------------------------------
     template <size_t D, size_t N, size_t L, typename S>
-    std::optional<SplitResult<D, N, L, S>> RSTInternalNode<D, N, L, S>::insert(const std::array<double, D>& key, const S& value)
+std::optional<SplitResult<D, N, L, S>> RSTInternalNode<D, N, L, S>::insert(
+    const std::array<double, D>& key, const S& value)
+{
+    MBR<D> key_mbr(key);
+    size_t best_index = find_best_child_insertion(key_mbr);
+
+    auto split = RSTNodeFN::insert(*children[best_index], key, value);
+    if (!split)
     {
-        if (!is_full())
-        {
-            // TODO: come back here
-        }
+        subregions[best_index]->expand(key);
+        region.expand(key);
+        return std::nullopt;
     }
 
-#pragma endregion
+    if (!is_full())
+    {
+        subregions[size] = split->new_region;
+        children[size] = std::move(split->sibling);
+        region.expand(split->new_region);
+        ++size;
+        return std::nullopt;
+    }
 
+    // Prepare entries for splitting
+    auto entries = pack_entries(subregions, children, split->new_region, std::move(split->sibling));
+    auto best_split = RSTLeafNode<D, N, L, std::shared_ptr<RSTNode<D, N, L, S>>>::find_best_split(entries);
+
+    std::sort(entries.begin(), entries.end(),
+              [&best_split](const auto& a, const auto& b) {
+                  return a.region.min[best_split.axis] < b.region.min[best_split.axis];
+              });
+
+    // Partition entries
+    MBR<D> lower, upper;
+    std::array<std::optional<MBR<D>>, L + 1> lower_subregions{}, upper_subregions{};
+    std::array<std::shared_ptr<RSTNode<D, N, L, S>>, L + 1> lower_children{}, upper_children{};
+
+    partition_entries(entries, best_split.location,
+                      lower, upper,
+                      lower_subregions, lower_children,
+                      upper_subregions, upper_children);
+
+    // Finalize current node
+    region = lower;
+    size = best_split.location;
+    subregions = std::move(lower_subregions);
+    children = std::move(lower_children);
+
+    // Create sibling node
+    auto sibling = std::make_unique<RSTInternalNode<D, N, L, S>>();
+    sibling->region = upper;
+    sibling->size = L + 1 - best_split.location;
+    sibling->subregions = std::move(upper_subregions);
+    sibling->children = std::move(upper_children);
+
+    return { SplitResult<D, N, L, S>{ sibling->region, std::move(sibling) } };
+}
 
 
 }
