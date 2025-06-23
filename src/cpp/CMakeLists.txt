@@ -5,6 +5,9 @@ if(NOT DEFINED ENV{SKBUILD})
     project(logngine LANGUAGES CXX)  # For CLion code insight
     cmake_minimum_required(VERSION 3.18)
 
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
     cmake_policy(SET CMP0054 NEW)
     cmake_policy(SET CMP0057 NEW)
     cmake_policy(SET CMP0148 NEW)
@@ -24,6 +27,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # ===== Core =====
 add_library(logngine_core STATIC
         core/hello.cpp
+        include/logngine/core/RSTTree.h
+        core/RSTTree.cpp
 )
 target_include_directories(logngine_core PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
