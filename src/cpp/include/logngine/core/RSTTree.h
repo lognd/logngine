@@ -8,6 +8,7 @@
 #include <memory>
 #include <queue>
 #include <limits>
+#include <functional>
 #include <stdexcept>
 #include <algorithm>
 
@@ -50,6 +51,9 @@ namespace logngine::core
 
     template <size_t D>
     using MBR = MinimumBoundingRegion<D>;
+
+    template <typename T>
+    using MaxHeap = std::priority_queue<std::pair<double, T>>;
 
 #pragma endregion
 
@@ -157,10 +161,14 @@ namespace logngine::core
         {
         }
 
+        // Querying
+        void query(const std::array<double, D>& key, size_t k, MaxHeap<S>& result, const std::function<bool(const S&)>& filter) const;
         std::optional<SplitResult<D, N, L, S>> insert(const std::array<double, D>& key, const S& value);
         [[nodiscard]] bool is_full() const { return this->size == L; }
 
     private:
+
+        // Helper functions
         static std::array<SplitEntry<D, S>, N + 1> pack_entries(
             const std::array<std::optional<MBR<D>>, N>& subregions,
             const std::array<std::optional<S>, N>& children,
@@ -198,10 +206,13 @@ namespace logngine::core
         std::array<std::optional<MBR<D>>, N> subregions{};
         std::array<std::unique_ptr<RSTNode<D, N, L, S>>, N> children{};
 
+        // Querying
+        void query(const std::array<double, D>& key, size_t k, MaxHeap<S>& result, const std::function<bool(const S&)>& filter) const;
         std::optional<SplitResult<D, N, L, S>> insert(const std::array<double, D>& key, const S& value);
         [[nodiscard]] bool is_full() const { return this->size == N; }
 
     private:
+        // Helper function
         static std::array<SplitEntry<D, std::shared_ptr<RSTNode<D, N, L, S>>>, N + 1>
         pack_entries(const std::array<std::optional<MBR<D>>, N>& subregions,
                      const std::array<std::shared_ptr<RSTNode<D, N, L, S>>, N>& children,
@@ -233,9 +244,10 @@ namespace logngine::core
     public:
         static constexpr double MIN_SPLIT = 0.25;
 
-        bool insert(const std::array<double, D_REGION>& key, const STORED_DATA_TYPE& value);
+        void insert(const std::array<double, D_REGION>& key, const STORED_DATA_TYPE& value);
         bool remove(const std::array<double, D_REGION>& key);
         std::vector<STORED_DATA_TYPE> query(const std::array<double, D_REGION>& key, size_t max = 1) const;
+        std::vector<STORED_DATA_TYPE> query_with_filter(const std::array<double, D_REGION>& key, size_t max = 1, const std::function<bool(const STORED_DATA_TYPE&)>& filter) const;
 
     private:
         std::unique_ptr<RSTNode<D_REGION, N_CHILD, N_KEYS, STORED_DATA_TYPE>> root = nullptr;
