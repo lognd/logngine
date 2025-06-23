@@ -1,5 +1,6 @@
 #include <logngine/core/RSTTree.h>
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <stdexcept>
 
@@ -70,14 +71,20 @@ namespace logngine::core
 
 #pragma region MBR Helper Functions
 
+
     template <size_t D>
-    double point_to_box_distance_squared(const std::array<double, D>& point, const MBR<D>& box)
+    double point_to_box_distance_scaled(const std::array<double, D>& point,
+                                        const MBR<D>& box,
+                                        const std::array<double, D>& scale)
     {
         double dist_sq = 0.0;
         for (size_t i = 0; i < D; ++i)
         {
-            if (point[i] < box.min[i]) dist_sq += (box.min[i] - point[i]) * (box.min[i] - point[i]);
-            else if (point[i] > box.max[i]) dist_sq += (point[i] - box.max[i]) * (point[i] - box.max[i]);
+            if (point[i] == inf || point[i] == -inf || std::isnan(point[i])) continue;
+
+            const double weight = scale[i];
+            if (point[i] < box.min[i]) dist_sq += weight * std::pow(box.min[i] - point[i], 2);
+            else if (point[i] > box.max[i]) dist_sq += weight * std::pow(point[i] - box.max[i], 2);
         }
         return dist_sq;
     }
@@ -309,19 +316,15 @@ namespace logngine::core
     void RSTLeafNode<D, N, L, S>::query(const std::array<double, D>& key,
                                         size_t k,
                                         MaxHeap<S>& result,
-                                        const std::function<bool(const S&)>& filter) const
+                                        const std::function<bool(const S&)>& filter,
+                                        const std::array<double, D>& scale) const
     {
         for (size_t i = 0; i < size; ++i)
         {
             if (!children[i]) continue;
             if (!filter(*children[i])) continue;
 
-            double dist_sq = 0.0;
-            for (size_t j = 0; j < D; ++j)
-            {
-                double diff = key[j] - subregions[i]->min[j]; // treat region as a point
-                dist_sq += diff * diff;
-            }
+            double dist_sq = point_to_box_distance_scaled(key, *subregions[i], scale);
 
             if (result.size() < k)
             {
@@ -475,7 +478,8 @@ namespace logngine::core
     void RSTInternalNode<D, N, L, S>::query(const std::array<double, D>& key,
                                             size_t k,
                                             MaxHeap<S>& result,
-                                            const std::function<bool(const S&)>& filter) const
+                                            const std::function<bool(const S&)>& filter,
+                                            const std::array<double, D>& scale) const
     {
         using QueueEntry = std::pair<double, size_t>;
         std::priority_queue<QueueEntry, std::vector<QueueEntry>, std::greater<>> pq;
@@ -483,7 +487,7 @@ namespace logngine::core
         for (size_t i = 0; i < size; ++i)
         {
             if (!subregions[i]) continue;
-            double dist_sq = point_to_box_distance_squared(key, *subregions[i]);
+            double dist_sq = point_to_box_distance_squared(key, *subregions[i], scale);
             pq.emplace(dist_sq, i);
         }
 
@@ -550,22 +554,24 @@ namespace logngine::core
     }
 
     template <typename S, size_t D, size_t N, size_t L>
-    std::vector<S> RSTTree<S, D, N, L>::query(const std::array<double, D>& key, size_t k) const
+    std::vector<S> RSTTree<S, D, N, L>::query(const std::array<double, D>& key, const size_t k, const std::array<double, D>& scale) const
     {
         return query_with_filter(key, k, [](const S&) { return true; });
     }
 
     template <typename S, size_t D, size_t N, size_t L>
     std::vector<S> RSTTree<S, D, N, L>::query_with_filter(const std::array<double, D>& key,
-                                                          size_t max,
-                                                          const std::function<bool(const S&)>& filter) const
+                                                          const size_t k,
+                                                          const std::function<bool(const S&)>& filter,
+                                                          const std::array<double, D>& scale) const
     {
         MaxHeap<S> result;
 
         if (!root) return {};
 
-        std::visit([&](const auto& node) {
-            node.query(key, max, result, filter);
+        std::visit([&](const auto& node)
+        {
+            node.query(key, k, result, filter, scale);
         }, *root);
 
         std::vector<S> output;

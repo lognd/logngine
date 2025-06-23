@@ -22,6 +22,7 @@ namespace logngine::core
     consteval size_t ceval_min(const size_t a, const size_t b) { return a < b ? a : b; }
     consteval size_t ceval_max(const size_t a, const size_t b) { return a > b ? a : b; }
     constexpr double inf = std::numeric_limits<double>::infinity();
+    constexpr double nan = std::numeric_limits<double>::quiet_NaN();
 
 #pragma endregion
 
@@ -162,7 +163,7 @@ namespace logngine::core
         }
 
         // Querying
-        void query(const std::array<double, D>& key, size_t k, MaxHeap<S>& result, const std::function<bool(const S&)>& filter) const;
+        void query(const std::array<double, D>& key, size_t k, MaxHeap<S>& result, const std::function<bool(const S&)>& filter, const std::array<double, D>& scale) const;
         std::optional<SplitResult<D, N, L, S>> insert(const std::array<double, D>& key, const S& value);
         [[nodiscard]] bool is_full() const { return this->size == L; }
 
@@ -207,7 +208,7 @@ namespace logngine::core
         std::array<std::unique_ptr<RSTNode<D, N, L, S>>, N> children{};
 
         // Querying
-        void query(const std::array<double, D>& key, size_t k, MaxHeap<S>& result, const std::function<bool(const S&)>& filter) const;
+        void query(const std::array<double, D>& key, size_t k, MaxHeap<S>& result, const std::function<bool(const S&)>& filter, const std::array<double, D>& scale) const;
         std::optional<SplitResult<D, N, L, S>> insert(const std::array<double, D>& key, const S& value);
         [[nodiscard]] bool is_full() const { return this->size == N; }
 
@@ -245,9 +246,8 @@ namespace logngine::core
         static constexpr double MIN_SPLIT = 0.25;
 
         void insert(const std::array<double, D_REGION>& key, const STORED_DATA_TYPE& value);
-        bool remove(const std::array<double, D_REGION>& key);
-        std::vector<STORED_DATA_TYPE> query(const std::array<double, D_REGION>& key, size_t max = 1) const;
-        std::vector<STORED_DATA_TYPE> query_with_filter(const std::array<double, D_REGION>& key, size_t max = 1, const std::function<bool(const STORED_DATA_TYPE&)>& filter) const;
+        std::vector<STORED_DATA_TYPE> query(const std::array<double, D_REGION>& key, size_t max = 1, const std::array<double, D_REGION>& scale) const;
+        std::vector<STORED_DATA_TYPE> query_with_filter(const std::array<double, D_REGION>& key, size_t max = 1, const std::function<bool(const STORED_DATA_TYPE&)>& filter, const std::array<double, D_REGION>& scale) const;
 
     private:
         std::unique_ptr<RSTNode<D_REGION, N_CHILD, N_KEYS, STORED_DATA_TYPE>> root = nullptr;
