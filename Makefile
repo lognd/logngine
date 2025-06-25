@@ -31,9 +31,14 @@ uninstall: venv
 	@echo "Uninstalling logngine..."
 	@$(VENV_PIP) uninstall -y logngine || echo "(Already uninstalled)"
 
-reinstall: venv
+build: venv
+	@echo "Creating pre-build files with build.py..."
+	@$(VENV_PIP) install tqdm numpy rtree
+	@$(VENV_PYTHON) build.py
+
+reinstall: venv build
 	@echo "Installing logngine in editable mode with test extras..."
-	@$(VENV_PIP) install -e .[test]
+	@$(VENV_PIP) install -e .[test,dev]
 
 test: venv
 	@echo "Running tests..."

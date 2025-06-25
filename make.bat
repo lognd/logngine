@@ -53,11 +53,19 @@ echo Uninstalling logngine...
 call "%VENV_PIP%" uninstall -y logngine || echo (Already uninstalled)
 goto :eof
 
+REM === Run pre-build setup and pre-compilation file creation ===
+:build
+call "%VENV_PIP%" install tqdm numpy rtree
+echo Creating pre-build files with build.py...
+call "%VENV_PYTHON%" build.py
+goto :eof
+
 REM === Reinstall the package ===
 :reinstall
 call :venv
+call :build
 echo Installing logngine in editable mode with test extras...
-call "%VENV_PIP%" install -e .[test]
+call "%VENV_PIP%" install -e .[test,dev]
 goto :eof
 
 REM === Run tests ===

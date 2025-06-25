@@ -42,20 +42,20 @@ class SVUVParser:
     # ------------------------------------------------------------------ #
     # CONSTRUCTION
     # ------------------------------------------------------------------ #
-    def __init__(self, dataset_dir: str | Path):
-        root = Path(dataset_dir).resolve()
-        if not root.is_dir():
-            raise NotADirectoryError(f"Dataset root '{root}' is not a directory")
+    def __init__(self): # , dataset_dir: str | Path):
+        # root = Path(dataset_dir).resolve()
+        # if not root.is_dir():
+        #     raise NotADirectoryError(f"Dataset root '{root}' is not a directory")
 
-        self._dirs: Dict[str, Path] = {
-            "root": root,
-            "data": root / "data",
-            "validation": root / "validation",
-        }
-        if not self._dirs["data"].is_dir():
-            raise FileNotFoundError("missing ‘data/’ folder")
-        if not self._dirs["validation"].is_dir():
-            raise FileNotFoundError("missing ‘validation/’ folder")
+        # self._dirs: Dict[str, Path] = {
+        #     "root": root,
+        #     "data": root / "data",
+        #     "validation": root / "validation",
+        # }
+        # if not self._dirs["data"].is_dir():
+        #     raise FileNotFoundError("missing ‘data/’ folder")
+        # if not self._dirs["validation"].is_dir():
+        #     raise FileNotFoundError("missing ‘validation/’ folder")
 
         self.reset()  # allocate mutable members
 

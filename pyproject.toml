@@ -31,3 +31,8 @@ sdist.include = [
 test = [
     "pytest>=7.0"
 ]
+dev = [
+    "tqdm",
+    "rtree",
+    "numpy"
+]

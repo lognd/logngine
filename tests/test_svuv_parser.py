@@ -13,7 +13,7 @@ DATA_FILE = ROOT / "datasets" / "data" / "fluids" / "water" / "saturation-table.
 
 # --------------------------------------------------------------------------- #
 def _parse() -> SVUVParser:
-    p = SVUVParser(dataset_dir=ROOT / "datasets")
+    p = SVUVParser()
     p.read(str(DATA_FILE))
     return p
 

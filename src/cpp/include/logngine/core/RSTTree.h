@@ -246,8 +246,8 @@ namespace logngine::core
         static constexpr double MIN_SPLIT = 0.25;
 
         void insert(const std::array<double, D_REGION>& key, const STORED_DATA_TYPE& value);
-        std::vector<STORED_DATA_TYPE> query(const std::array<double, D_REGION>& key, size_t max = 1, const std::array<double, D_REGION>& scale) const;
-        std::vector<STORED_DATA_TYPE> query_with_filter(const std::array<double, D_REGION>& key, size_t max = 1, const std::function<bool(const STORED_DATA_TYPE&)>& filter, const std::array<double, D_REGION>& scale) const;
+        std::vector<STORED_DATA_TYPE> query(const std::array<double, D_REGION>& key, size_t max, const std::array<double, D_REGION>& scale) const;
+        std::vector<STORED_DATA_TYPE> query_with_filter(const std::array<double, D_REGION>& key, size_t max, const std::function<bool(const STORED_DATA_TYPE&)>& filter, const std::array<double, D_REGION>& scale) const;
 
     private:
         std::unique_ptr<RSTNode<D_REGION, N_CHILD, N_KEYS, STORED_DATA_TYPE>> root = nullptr;

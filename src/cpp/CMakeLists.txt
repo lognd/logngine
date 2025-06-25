@@ -29,6 +29,8 @@ add_library(logngine_core STATIC
         core/hello.cpp
         include/logngine/core/RSTTree.h
         core/RSTTree.cpp
+        include/logngine/data/thermo/State.cpp
+        include/logngine/data/thermo/State.h
 )
 target_include_directories(logngine_core PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
