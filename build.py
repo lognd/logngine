@@ -1,5 +1,5 @@
-from tools.SourceBaker import SourceBaker
+from tools.DatasetBaker import DatasetBaker
 
 if __name__ == '__main__':
-    sb = SourceBaker()
+    db = DatasetBaker()
 

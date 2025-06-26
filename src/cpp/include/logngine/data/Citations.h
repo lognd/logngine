@@ -1,0 +1,15 @@
+#pragma once
+#include <cstddef>
+
+namespace logngine::data {
+#pragma region Predeclarations
+#pragma endregion  // Predeclarations
+#pragma region Declarations
+#pragma endregion  // Declarations
+#pragma region Definitions
+constexpr const char*[] CITATIONS = {"Yunus A. Çengel and Michael A. Boles, Thermodynamics: An Engineering Approach, McGraw-Hill. Appendix 1, Table A-4. [https://www.slaythepe.com/uploads/7/2/3/9/72392189/appendix1_siunits_1.pdf]", "Yunus A. Çengel and Michael A. Boles, Thermodynamics: An Engineering Approach, McGraw-Hill. Appendix 1, Table A-5. [https://www.slaythepe.com/uploads/7/2/3/9/72392189/appendix1_siunits_1.pdf]", "Yunus A. Çengel and Michael A. Boles, Thermodynamics: An Engineering Approach, McGraw-Hill. Appendix 2, Table A-4E. [https://www.slaythepe.com/uploads/7/2/3/9/72392189/appendix2_englishunits_1.pdf]", "Yunus A. Çengel and Michael A. Boles, Thermodynamics: An Engineering Approach, McGraw-Hill. Appendix 2, Table A-5E. [https://www.slaythepe.com/uploads/7/2/3/9/72392189/appendix2_englishunits_1.pdf]"};
+constexpr std::size_t NUM_CITATIONS = 4;
+#pragma endregion  // Definitions
+#pragma region Baked-In Source File
+#pragma endregion
+}
