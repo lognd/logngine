@@ -43,15 +43,15 @@ class SourceBuilder(ABC):
         self._elements.append(element)
 
     def build(self) -> None:
-        with self._section("#pragma region Predeclarations", "#pragma endregion  // Predeclarations"):
+        with self._section("\n#pragma region Predeclarations", "#pragma endregion  // Predeclarations"):
             for element in self._elements:
                 self._add_indented(element.get_predeclarations(), element.get_indent())
 
-        with self._section("#pragma region Declarations", "#pragma endregion  // Declarations"):
+        with self._section("\n#pragma region Declarations", "#pragma endregion  // Declarations"):
             for element in self._elements:
                 self._add_indented(element.get_declarations(), element.get_indent())
 
-        with self._section("#pragma region Definitions", "#pragma endregion  // Definitions"):
+        with self._section("\n#pragma region Definitions", "#pragma endregion  // Definitions"):
             for element in self._elements:
                 self._add_indented(element.get_definitions(), element.get_indent())
 
@@ -194,8 +194,8 @@ class SourceFile(SourceBuilder):
         for inc in self.includes:
             self._extend(inc.get_predeclarations())
         self._extend([""])
-        with self._section(f"namespace {self.namespace} {{", "}"):
+        with self._section(f"\nnamespace {self.namespace} {{", "}"):
             super().build()
-            with self._section("#pragma region Baked-In Source File", "#pragma endregion"):
+            with self._section("\n#pragma region Baked-In Source File", "#pragma endregion"):
                 for r in self.embedded:
                     self._extend(r.get_definitions())
