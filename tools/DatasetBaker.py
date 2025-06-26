@@ -23,7 +23,11 @@ class DatasetBaker:
     def __init__(self):
         self.parser = SVUVParser()
         self.dataset = {}
+
         self.table_name = ""
+        self.data_name = ""
+        self.entry_name = ""
+        self.make_function_name = ""
 
         for path in self.IN_PATH.rglob("*.svuv"):
             out_path = self.OUT_PATH / path.relative_to(self.IN_PATH)
@@ -42,7 +46,11 @@ class DatasetBaker:
 
         order = self._optimize_ordering()
         self._apply_order(order)
+
         self.table_name = out_path.stem
+        self.make_function_name = f'_make_baked_{self.table_name.lower()}_dataset'
+        self.data_name = f'{self.table_name}Data'
+        self.entry_name = f'{self.table_name}Entry'
 
         writer = SourceFile(namespace)
         writer.add_include("array")
@@ -51,27 +59,27 @@ class DatasetBaker:
         headers = [k for k in self.dataset if '$' not in k]
         n_features = len(headers)
 
-        data_struct = SourceObject.Struct("Data", **{k: "const double" for k in headers})
-        table_struct = SourceObject.Struct("TableEntry", data="const Data", uncertainty="const Data", citation="const unsigned int")
+        data_struct = SourceObject.Struct(self.data_name, **{k: "const double" for k in headers})
+        table_struct = SourceObject.Struct(self.entry_name, data=f"const {self.data_name}", uncertainty=f"const {self.data_name}", citation="const unsigned int")
 
         writer.add(data_struct)
         writer.add(table_struct)
 
         inserts = self._generate_insert_statements(headers)
-        inserts.insert(0, f"logngine::core::RSTTree<TableEntry, {n_features}, 16, 16> {self.table_name}{{}};")
+        inserts.insert(0, f"logngine::core::RSTTree<{self.entry_name}, {n_features}, 16, 16> {self.table_name}{{}};")
         inserts.append(f"return {self.table_name};")
 
         factory = SourceObject.Function(
-            "make_dataset",
+            self.make_function_name,
             inserts,
-            f"inline logngine::core::RSTTree<TableEntry, {n_features}, 16, 16>"
+            f"inline logngine::core::RSTTree<{self.entry_name}, {n_features}, 16, 16>"
         )
         writer.add(factory)
 
         result = SourceObject.Variable(
-            f"const logngine::core::RSTTree<TableEntry, {n_features}, 16, 16>",
+            f"const logngine::core::RSTTree<{self.entry_name}, {n_features}, 16, 16>",
             self.table_name,
-            "make_dataset()"
+            f"{self.make_function_name}()"
         )
         writer.add(result)
         writer.build()
@@ -144,10 +152,10 @@ class DatasetBaker:
                 zip(*[self.dataset[h + "$uncertainty"] for h in headers]),
                 self.dataset["$citation"]
         ):
-            d = self._as_initializer("Data", map(str, data_row))
-            u = self._as_initializer("Data", map(str, uncert_row))
+            d = self._as_initializer(self.data_name, map(str, data_row))
+            u = self._as_initializer(self.data_name, map(str, uncert_row))
             c = str(self.__class__.citations.index(citation))
-            entries.append(self._as_initializer("TableEntry", [d, u, c]))
+            entries.append(self._as_initializer(self.entry_name, [d, u, c]))
         return entries
 
     @staticmethod
