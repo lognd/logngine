@@ -396,7 +396,7 @@ class SVUVParser:
         """
         try:
             q_si = (value * self._ureg(unit)).to_base_units()
-        except UndefinedUnitError as exc:
+        except (UndefinedUnitError, AssertionError) as exc:
             raise UnknownUnitError(f"Unknown unit “{unit}” in {self._file}") from exc
         return q_si.magnitude, str(q_si.units)
 
@@ -417,11 +417,12 @@ class SVUVParser:
         data = {}
         row_iter = iter(row)
         for _header in self._headers:
-            value = next(row_iter)
-            if _header == self.IGNORE_LITERAL: continue
-            elif _header in constants: data[_header] = constants[_header]
-            else: data[_header] = value
-
+            if _header in constants: data[_header] = constants[_header]
+            else:
+                try: value = next(row_iter)
+                except StopIteration: raise ValueError(f"Quiet header/data length mismatch with row content, {row}, in file, {self._file}")
+                if _header == self.IGNORE_LITERAL: continue
+                else: data[_header] = value
         return data
 
     def _next_line(self) -> Optional[str]:

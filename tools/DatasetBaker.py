@@ -32,7 +32,10 @@ class DatasetBaker:
         for path in self.IN_PATH.rglob("*.svuv"):
             out_path = self.OUT_PATH / path.relative_to(self.IN_PATH)
             out_path.parent.mkdir(parents=True, exist_ok=True)
+            self.parser.read(path)  # pre-read for parsing's sake; kinda wasteful but who cares
 
+        for path in self.IN_PATH.rglob("*.svuv"):
+            out_path = self.OUT_PATH / path.relative_to(self.IN_PATH)
             header_name = ''.join(w.capitalize() for w in path.stem.split('-')) + ".h"
             namespace = "::".join(path.relative_to(self.IN_PATH).parts[:-1])
             namespace = f"logngine::data::{namespace}" if namespace else "logngine::data"
@@ -201,7 +204,7 @@ class DatasetBaker:
         return area, overlap
 
     @classmethod
-    def _find_best_insertion_order(cls, entries: List[Tuple[Tuple[List[float], List[float]], str]], trials: int = 2000):
+    def _find_best_insertion_order(cls, entries: List[Tuple[Tuple[List[float], List[float]], str]], trials: int = 1000):
         best, best_score, all_scores = [], float("inf"), []
 
         for _ in tqdm(range(trials), desc="Optimizing insertion order"):
