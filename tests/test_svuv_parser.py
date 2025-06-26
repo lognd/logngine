@@ -8,7 +8,7 @@ sys.path.append(str(ROOT))
 from tools import SVUVParser
 
 TOOLS_DIR = ROOT / "tools"
-DATA_FILE = ROOT / "datasets" / "data" / "fluids" / "water" / "saturation-table.svuv"
+DATA_FILE = ROOT / "datasets" / "data" / "thermo" / "water" / "saturation-table.svuv"
 
 
 # --------------------------------------------------------------------------- #

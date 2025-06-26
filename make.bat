@@ -55,7 +55,7 @@ goto :eof
 
 REM === Run pre-build setup and pre-compilation file creation ===
 :build
-call "%VENV_PIP%" install tqdm numpy rtree
+call "%VENV_PIP%" install tqdm numpy rtree pint
 echo Creating pre-build files with build.py...
 call "%VENV_PYTHON%" build.py
 goto :eof

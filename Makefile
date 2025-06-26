@@ -33,7 +33,7 @@ uninstall: venv
 
 build: venv
 	@echo "Creating pre-build files with build.py..."
-	@$(VENV_PIP) install tqdm numpy rtree
+	@$(VENV_PIP) install tqdm numpy rtree pint
 	@$(VENV_PYTHON) build.py
 
 reinstall: venv build
