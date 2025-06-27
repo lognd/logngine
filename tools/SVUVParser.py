@@ -111,7 +111,7 @@ class SVUVParser:
     # ------------------------------------------------------------------ #
     # USER INTERFACE
     # ------------------------------------------------------------------ #
-    def to_csv(self, path: str | Path, *, include_uncert=True) -> None:
+    def to_csv(self, path: str | Path, *, include_uncert=True, include_cite=True) -> None:
         """
         Write the parsed table to ``path`` using the built-in csv module.
 
@@ -121,6 +121,8 @@ class SVUVParser:
             Output file name.
         include_uncert : bool, default True
             If *False* drop the ``$uncertainty`` columns.
+        include_cite : bool, default True
+            If *False* drop the ``$citation`` column.
         """
         # Pick the order used during parsing
         heads = [h for h in self._headers if h != self.IGNORE_LITERAL]
@@ -128,6 +130,8 @@ class SVUVParser:
         # Optionally prune uncertainty columns
         if include_uncert:
             heads += [f"{h}$uncertainty" for h in heads]
+        if include_cite:
+            heads += ['$citation']
         rows = zip_longest(*(self._data[h] for h in heads), fillvalue="")
 
         with open(str(path), "w", newline="", encoding="utf-8") as fh:

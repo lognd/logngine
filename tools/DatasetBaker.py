@@ -16,6 +16,7 @@ class DatasetBaker:
     ROOT = Path(__file__).parent.parent.resolve()
     IN_PATH = ROOT / 'datasets' / 'data'
     OUT_PATH = ROOT / 'src' / 'cpp' / 'include' / 'logngine' / 'data'
+    CSV_PATH = ROOT / 'src' / 'logngine' / 'data'
     CITATION_FILE = OUT_PATH / 'Citations.h'
 
     citations: list[str] = []
@@ -31,17 +32,24 @@ class DatasetBaker:
 
         for path in self.IN_PATH.rglob("*.svuv"):
             out_path = self.OUT_PATH / path.relative_to(self.IN_PATH)
+            csv_path = self.CSV_PATH / path.relative_to(self.IN_PATH)
             out_path.parent.mkdir(parents=True, exist_ok=True)
+            csv_path.parent.mkdir(parents=True, exist_ok=True)
             self.parser.read(path)  # pre-read for parsing's sake; kinda wasteful but who cares
 
         for path in self.IN_PATH.rglob("*.svuv"):
             out_path = self.OUT_PATH / path.relative_to(self.IN_PATH)
+            csv_path = self.CSV_PATH / path.relative_to(self.IN_PATH)
             header_name = ''.join(w.capitalize() for w in path.stem.split('-')) + ".h"
             namespace = "::".join(path.relative_to(self.IN_PATH).parts[:-1])
             namespace = f"logngine::data::{namespace}" if namespace else "logngine::data"
 
             self.compile_to_header(path, out_path.with_name(header_name), namespace)
+            self.compile_to_csv(csv_path.with_name(str(Path(header_name).stem + '.csv')))
         self.compile_citations()
+
+    def compile_to_csv(self, out_path: Path, *, include_uncert=True, include_cite=True) -> None:
+        self.parser.to_csv(out_path, include_uncert=include_uncert, include_cite=include_cite)
 
     def compile_to_header(self, in_path: Path, out_path: Path, namespace: str):
         self.dataset = self.parser.read(in_path)
