@@ -65,7 +65,7 @@ REM === Reinstall the package ===
 call :venv
 call :build
 echo Installing logngine in editable mode with test extras...
-call "%VENV_PIP%" install -e .[test,dev]
+call "%VENV_PIP%" install -e .[test,dev,thermosolver]
 goto :eof
 
 REM === Run tests ===

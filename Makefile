@@ -38,7 +38,7 @@ build: venv
 
 reinstall: venv build
 	@echo "Installing logngine in editable mode with test extras..."
-	@$(VENV_PIP) install -e .[test,dev]
+	@$(VENV_PIP) install -e .[test,dev,thermosolver]
 
 test: venv
 	@echo "Running tests..."

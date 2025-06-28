@@ -11,7 +11,9 @@ requires-python = ">=3.9"
 authors = [{name = "Logan Dapp", email = "logan@logand.app"}]
 license = {file = "LICENSE"}
 dependencies = [
-    'pint'
+    'pint',
+    'pydantic',
+    'sympy'
 ]
 
 [tool.scikit-build]
@@ -35,4 +37,7 @@ dev = [
     "tqdm",
     "rtree",
     "numpy"
+]
+thermosolver = [
+    "loguru"
 ]
